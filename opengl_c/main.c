@@ -119,7 +119,7 @@ int main() {
 		glfwPollEvents();
 	}
 
-	//general cleanup. i already do bad conversion and dont really clean up but i dont give a fuck
+	//general cleanup. i already do bad conversion and dont really manage memory but i dont give a fuck
 	glDeleteVertexArrays(1, &buffers.VAO);
 	glDeleteBuffers(1, &buffers.VBO);
 	glDeleteProgram(CUBEshaderProgram);
