@@ -102,34 +102,29 @@ int main() {
 		glActiveTexture(GL_TEXTURE0);
 		//and bind it to the previosly loaded texture
 		glBindTexture(GL_TEXTURE_2D, texture);
-
 		// Set the uniform for the texture in the shader
 		glUniform1i(glGetUniformLocation(CUBEshaderProgram, "texture1"), 0); // Texture unit 0
 
-
-
-		// Bind the VAO that holds the VBO (no EBO required)
+		//bind the VAO that holds the VBO
 		glBindVertexArray(buffers.VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36); // Draw 36 vertices directly
-		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 36); //finally we draw the cube
 
-		// Unbind VAO and texture
+		// Unbind VAO and texture - avoids silly erors
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
 
-
+		//set swap itnerval so we dont use stupid amount of computer
 		glfwSwapInterval(1);
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window); //swap the front with back
 		glfwPollEvents();
 	}
 
+	//general cleanup. i already do bad conversion and dont really clean up but i dont give a fuck
 	glDeleteVertexArrays(1, &buffers.VAO);
 	glDeleteBuffers(1, &buffers.VBO);
-	//glDeleteBuffers(1, &buffers.EBO);
 	glDeleteProgram(CUBEshaderProgram);
-
 	glfwDestroyWindow(window);
 	glfwTerminate();
-
+	//return :)
 	return 0;
 }
