@@ -1,6 +1,6 @@
 #include "glfunc.h"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include <stb_image.h>
 
 GLuint OPENGLcompile_shader(const char* vert, const char* frag) {
 	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);

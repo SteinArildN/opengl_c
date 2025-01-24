@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\myLibraries\glfw-3.4.bin.WIN64\include;C:\myLibraries\glad\include;C:\myLibraries\cglm-master\include;C:\myLibraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\myLibraries\glfw-3.4.bin.WIN64\include;C:\myLibraries\glad\include;C:\myLibraries\cglm-master\include;C:\myLibraries\glfw-3.4.bin.WIN64\lib-vc2022;C:\myLibraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -121,7 +121,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\myLibraries\glfw-3.4.bin.WIN64\include;C:\myLibraries\glad\include;C:\myLibraries\cglm-master\include;C:\myLibraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\myLibraries\glfw-3.4.bin.WIN64\include;C:\myLibraries\glad\include;C:\myLibraries\cglm-master\include;C:\myLibraries\glfw-3.4.bin.WIN64\lib-vc2022;C:\myLibraries\stb-master;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
