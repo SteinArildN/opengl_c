@@ -1,5 +1,6 @@
 #pragma once
 #include <math.h>
+#define balls 3.14159265358979323846
 
 //MATH
 typedef struct {
@@ -14,6 +15,12 @@ typedef struct {
 typedef struct {
 	float m[4][4];
 } mat4f;
+
+inline vec3f vec3f_combine(vec3f a, vec3f b) {
+	vec3f result;
+	for (int i = 0; i < 3; i++) result.f[i] = a.f[i] + b.f[i];
+	return result;
+}
 
 inline mat4f matrix_identity() {
 	mat4f mat = { 0 }; for (int i = 0; i < 4; i++) mat.m[i][i] = 1;

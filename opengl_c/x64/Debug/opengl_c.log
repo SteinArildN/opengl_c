@@ -1,27 +1,17 @@
-﻿  gldata.c
-  glfunc.c
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(100,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'glfunc.c')
+﻿  game.c
+C:\Users\Stein\source\repos\opengl_c\opengl_c\glmath.h(107,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'game.c')
   
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(106,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'glfunc.c')
+C:\Users\Stein\source\repos\opengl_c\opengl_c\glmath.h(113,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'game.c')
   
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(107,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'glfunc.c')
+C:\Users\Stein\source\repos\opengl_c\opengl_c\glmath.h(114,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+  (compiling source file 'game.c')
   
-  main.c
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(100,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'main.c')
-  
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(106,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'main.c')
-  
-C:\Users\bakaz\opengl_c\opengl_c\glmath.h(107,20): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
-  (compiling source file 'main.c')
-  
-C:\Users\bakaz\opengl_c\opengl_c\main.c(95,44): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\bakaz\opengl_c\opengl_c\main.c(96,42): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\bakaz\opengl_c\opengl_c\main.c(96,47): warning C4305: 'initializing': truncation from 'double' to 'float'
-C:\Users\bakaz\opengl_c\opengl_c\main.c(96,52): warning C4305: 'initializing': truncation from 'double' to 'float'
-  Generating Code...
-  opengl_c.vcxproj -> C:\Users\bakaz\opengl_c\x64\Debug\opengl_c.exe
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(21,52): warning C4305: '*=': truncation from 'double' to 'float'
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(33,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(34,7): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(35,18): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(51,15): warning C4305: 'initializing': truncation from 'double' to 'float'
+C:\Users\Stein\source\repos\opengl_c\opengl_c\game.c(22,1): warning C4716: 'degrees_to_radians': must return a value
+  opengl_c.vcxproj -> C:\Users\Stein\source\repos\opengl_c\x64\Debug\opengl_c.exe

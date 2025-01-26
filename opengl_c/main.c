@@ -3,6 +3,37 @@
 #include <stdio.h>
 
 #include "glfunc.h"
+#include "game.h"
+
+void create_cube(vec3f array[64], vec3f rot, vec3f pos) {
+	for (int i = 0; i < 3; i++) pos.f[i] *= -1;
+	rot.f[0] *= -1; rot.f[1] *= 2; rot.f[2] *= -1;
+	for (int i = 0; i < 64; i++) {
+		if (array[i].f[0] == 0 && array[i].f[1] == 0 && array[i].f[2] == 0) {
+			array[i] = vec3f_combine(quick_vector_calc(rot, 10), pos);
+			//array[i] = pos;
+			//array[i] = quick_vector_calc(rot, 1);
+			fprintf(stderr, "cube created at index %.f\n", (float)i);
+			for (int j = 0; j < 3; j++) {
+				fprintf(stderr, "pos: %.f\n", array[i].f[0]);
+			}
+			break;
+		}
+		else {
+			printf(stderr, "no cube created");
+		}
+	}
+}
+
+void print_matrix(mat4f mat) {
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			fprintf(stderr, "{ %.2f }", mat.m[i][j] );
+		}
+		fprintf(stderr, "\n");
+	}
+	fprintf(stderr, "\n");
+}
 
 //CALLBACK FUNCTIONS
 void error_callback(int error, const char* description) {
@@ -15,116 +46,131 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 int main() {
-	glfwSetErrorCallback(error_callback); //set callback func
-
-	//init glfw
+	glfwSetErrorCallback(error_callback);
 	if (!glfwInit()) {
 		fprintf(stderr, "Failed to initialize GLFW.\n");
 	}
 
-	//create window
 	GLFWwindow* window = glfwCreateWindow(800, 600, "opengl in c", NULL, NULL);
 	if (!window) {
 		fprintf(stderr, "Failed to create GLFW window.\n");
 		glfwTerminate();
 	}
 
-	//make context, do all gl after this
-	//prob add message if fails
 	glfwMakeContextCurrent(window);
 	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 
-	//various gl variables we need to declare for late use
-	//texture that we load and pass to opengl later
 	GLuint texture = OPENGLloadTexture("stone.png");
-	//compile our vert and frag shader into progam (for cubes)
 	GLuint CUBEshaderProgram = OPENGLcompile_shader(vertexTextureShaderSource, fragmentTextureShaderSource);
-	//creating empty buffers, and specifying what data they should have (cubes)
 	glSimpleBuffers buffers;
 	glSimpleBufferContent content = {
 		vertices_simple,
 		vertices_simple_size
 	};
-	//this sets up our buffer with the buffer and content struct
 	OPENGLsetup_buffers_simple(&buffers, &content, 1);
 
-	//enable some coooool things
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 
-	//set some 'global' variables
 	double time;
 	int width, height;
+	struct camera cam = {
+		{0,0,0},
+		{0,0,0}
+	};
+	glfwSetWindowUserPointer(window, &cam);
 
-	//loop
+	int lol = 0;
+	vec3f cubes[64] = {0};
+
 	while (!glfwWindowShouldClose(window)) {
-		//sets func in which to call for input
 		glfwSetKeyCallback(window, key_callback);
+		key_loop(window);
 
 		time = glfwGetTime();
-		glfwGetFramebufferSize(window, &width, &height); //we constantly get the window size, as it can be changed
-		const float ratio = width / (float)height; //also the ratio, we use it for projection
+		glfwGetFramebufferSize(window, &width, &height);
+		const float ratio = width / (float)height;
 		
-		//set the view port, tells gl how big 'its canvas' is
 		glViewport(0, 0, width, height);
-		//set the clear/bg color, and clear it along side depth buffer bit
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		//these *will* be universal matricies
-		//projection converts our scene into gl's projection matrix
-		//view is basically our camera
 		mat4f projection = matrix_createPerspective(70.f, ratio, 0.1f, 100.f);
 		mat4f view = matrix_identity();
 
-		//use our cube program, because we are now going to draw cubes
+		view = camera_to_matrix(&cam);
+
 		glUseProgram(CUBEshaderProgram);
 
-		//time to bind the projection matrix in our shader program
 		OPENGLbindUniform_Mat4f(CUBEshaderProgram, "projection", projection);
-		//and the view matrix
 		OPENGLbindUniform_Mat4f(CUBEshaderProgram, "view", view);
 
-		/*
-		//Loop for 'creating cubes' start:
-		*/
+		lol++;
+		//fprintf(stderr, "lol is now: %.f\n", (float)lol);
+		if (lol > 100) {
+			create_cube(cubes, cam.rot, cam.pos);
+			lol = 0;
+		}
 
-		//now we create our model matrix, which will differ from each other
-		//i also apply som manipulations to the matrix. follow this order s-r-t as to not have them mess with each other
-		mat4f model = matrix_identity();
-		model = matrix_scale(model, (vec3f) { 1, 0.2, 0.5 });
-		model = matrix_rotate(model, (vec4f) { 0.9, 0.6, 0.3, (float)time });
-		model = matrix_translate(model, (vec3f) { 0, 0, -2 });
-		//and the bind the model to the shader program
-		OPENGLbindUniform_Mat4f(CUBEshaderProgram, "model", model);
+		for (int i = 0; i < 64; i++) {
+			if (cubes[i].f[0] == 0 && cubes[i].f[1] == 0 && cubes[i].f[2] == 0) continue;
+			mat4f model = matrix_identity();
+			model = matrix_scale(model, (vec3f) { 1, 0.2, 0.5 });
+			model = matrix_rotate(model, (vec4f) { 0.9, 0.6, 0.3, (float)time });
+			model = matrix_translate(model, cubes[i]);
+			//and the bind the model to the shader program
+			OPENGLbindUniform_Mat4f(CUBEshaderProgram, "model", model);
 
-		//before we draw our cube, we first activate unit 0 of gl_textures
-		glActiveTexture(GL_TEXTURE0);
-		//and bind it to the previosly loaded texture
-		glBindTexture(GL_TEXTURE_2D, texture);
-		// Set the uniform for the texture in the shader
-		glUniform1i(glGetUniformLocation(CUBEshaderProgram, "texture1"), 0); // Texture unit 0
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glUniform1i(glGetUniformLocation(CUBEshaderProgram, "texture1"), 0); // Texture unit 0
 
-		//bind the VAO that holds the VBO
-		glBindVertexArray(buffers.VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 36); //finally we draw the cube
+			glBindVertexArray(buffers.VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		// Unbind VAO and texture - avoids silly erors
-		glBindVertexArray(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glBindVertexArray(0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
 
-		//set swap itnerval so we dont use stupid amount of computer
+		vec3f positions[4] = {
+			{2,0,0},
+			{-2,0,0},
+			{0,0,2},
+			{0,0,-2}
+		};
+		
+		for (int i = 0; i < 4; i++) {
+			mat4f model = matrix_identity();
+			model = matrix_scale(model, (vec3f) { 1, 0.2, 0.5 });
+			model = matrix_rotate(model, (vec4f) { 0.9, 0.6, 0.3, (float)time });
+			model = matrix_translate(model, positions[i]);
+			//and the bind the model to the shader program
+			OPENGLbindUniform_Mat4f(CUBEshaderProgram, "model", model);
+
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glUniform1i(glGetUniformLocation(CUBEshaderProgram, "texture1"), 0); // Texture unit 0
+
+			glBindVertexArray(buffers.VAO);
+			glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			glBindVertexArray(0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		
+
+
 		glfwSwapInterval(1);
-		glfwSwapBuffers(window); //swap the front with back
+		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 
-	//general cleanup. i already do bad conversion and dont really manage memory but i dont give a fuck
 	glDeleteVertexArrays(1, &buffers.VAO);
 	glDeleteBuffers(1, &buffers.VBO);
 	glDeleteProgram(CUBEshaderProgram);
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
-	//return :)
+
 	return 0;
 }
