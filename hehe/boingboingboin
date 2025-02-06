@@ -1,0 +1,622 @@
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include <stdio.h>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+#include <math.h>
+#define PI 3.14159265358979323846
+
+//silly data
+float vertices[] = {
+	// Positions           // Colors          // Texture Coords
+	// Front face
+	-0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+	 0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  1.0f, 0.0f,  // Bottom-right
+	 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	 0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	-0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 1.0f,  // Top-left
+	-0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+
+	// Back face
+	-0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+	-0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // Top-left
+	 0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	 0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	 0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // Bottom-right
+	-0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+
+	// Left face
+	-0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+	-0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f,  // Bottom-right
+	-0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	-0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	-0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f,  // Top-left
+	-0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+
+	// Right face
+	 0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+	 0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,  1.0f, 0.0f,  // Top-left
+	 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	 0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,  1.0f, 1.0f,  // Top-right
+	 0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 0.0f,  0.0f, 1.0f,  // Bottom-right
+	 0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 0.0f,  0.0f, 0.0f,  // Bottom-left
+
+	 // Top face
+	 -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+	  0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 1.0f,  1.0f, 0.0f,  // Bottom-right
+	  0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	  0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	 -0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 1.0f,  0.0f, 1.0f,  // Top-left
+	 -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+
+	 // Bottom face
+	 -0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+	 -0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,  1.0f, 0.0f,  // Bottom-right
+	  0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	  0.5f, -0.5f,  0.5f,   1.0f, 1.0f, 1.0f,  1.0f, 1.0f,  // Top-right
+	  0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,  0.0f, 1.0f,  // Top-left
+	 -0.5f, -0.5f, -0.5f,   1.0f, 1.0f, 1.0f,  0.0f, 0.0f,  // Bottom-left
+};
+
+// Vertex Shader Source with texture!!
+const char* vertex_source =
+"#version 330 core\n"
+"layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"layout (location = 2) in vec2 aTexCoord;\n"  // Change to vec2 for texture coordinates
+"out vec3 ourColor;\n"
+"out vec2 TexCoord;\n"
+"uniform mat4 projection;\n"
+"uniform mat4 view;\n"
+"uniform mat4 model;\n"
+"void main() {\n"
+"    gl_Position = projection * view * model * vec4(aPos, 1.0);\n"
+"    ourColor = aColor;\n"
+"    TexCoord = aTexCoord;\n"  // Add the semicolon here
+"}\n";
+
+// Fragment Shader Source
+const char* fragment_source =
+"#version 330 core\n"
+"out vec4 FragColor;\n"
+"in vec3 ourColor;\n"
+"in vec2 TexCoord;\n"  // Texture coordinates passed from the vertex shader
+"uniform sampler2D texture1;\n"  // The texture
+"void main() {\n"
+"    vec4 textureColor = texture(texture1, TexCoord);  // Sample the texture\n"
+"    FragColor = textureColor * vec4(ourColor, 1.0);  // Combine texture color with vertex color\n"
+"}\n";
+
+//lol
+int int_random(int min, int max) {
+	return min + rand() / (RAND_MAX / (max - min + 1) + 1);
+}
+
+//math
+typedef struct vec2 {
+	float f[2];
+} vec2;
+typedef struct vec3 {
+	float f[3];
+} vec3;
+typedef struct vec4 {
+	float f[4];
+} vec4;
+typedef struct mat4 {
+	float m[4][4];
+} mat4;
+//vector
+vec3 vector_combine(vec3 a, vec3 b) {
+	for (int i = 0; i < 3; i++) a.f[i] += b.f[i];
+	return a;
+}
+vec3 vector_scalar(vec3 a, float b) {
+	for (int i = 0; i < 3; i++) a.f[i] *= b;
+	return a;
+}
+vec3 vector_multi(vec3 a, vec3 b) {
+	for (int i = 0; i < 3; i++) a.f[i] *= b.f[i];
+	return a;
+}
+//this doesnt account for roll rotation
+vec3 vector_rotate3d(vec3 vec, vec3 rot) {
+	rot.f[0] *= (PI / 180);
+	rot.f[1] *= (PI / 180);
+	rot.f[2] *= (PI / 180);
+	vec.f[0] *= cosf(rot.f[0]) * sinf(rot.f[1]);
+	vec.f[1] *= sinf(-rot.f[0]);
+	vec.f[2] *= cosf(rot.f[0]) * cosf(rot.f[1]);
+	return vec;
+}
+//just for player movmeent...
+vec3 vector_rotate2d(vec3 vec, vec3 rot) {
+	rot.f[1] * (PI / 180);
+	vec.f[0] = sinf(rot.f[1]);
+	vec.f[2] = cosf(rot.f[1]);
+	return vec;
+}
+void vector_normalize(vec3* rot) {
+	while (rot->f[0] < -180) rot->f[0] += 360;
+	while (rot->f[0] > 180) rot->f[0] -= 360;
+	while (rot->f[1] < -180) rot->f[1] += 360;
+	while (rot->f[1] > 180) rot->f[1] -= 360;
+}
+void vector_clamp(vec3* rot) {
+	if (rot->f[0] > 90)
+		rot->f[0] = 90;
+	if (rot->f[0] < -90)
+		rot->f[0] = -90;
+}
+//matrix
+mat4 matrix_identity() {
+	mat4 mat = { 0 };
+	for (int i = 0; i < 4; i++) mat.m[i][i] = 1;
+	return mat;
+}
+mat4 matrix_perspective(float fov, float aspect, float near, float far) {
+	mat4 mat = { 0 };
+	float tanHalfFOV = tanf(fov / 2.0f);
+	mat.m[0][0] = 1.0f / (aspect * tanHalfFOV);
+	mat.m[1][1] = 1.0f / tanHalfFOV;
+	mat.m[2][2] = -(far + near) / (far - near);
+	mat.m[2][3] = -1.0f;
+	mat.m[3][2] = -(2.0f * far * near) / (far - near);
+	return mat;
+}
+mat4 matrix_scalar(mat4 a, float b) {
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			a.m[i][j] *= b;
+	return a;
+}
+mat4 matrix_multi(mat4 a, mat4 b) {
+	mat4 result = { 0 };
+	for (int i = 0; i < 4; i++)
+		for (int j = 0; j < 4; j++)
+			for (int k = 0; k < 4; k++)
+				result.m[i][j] += a.m[i][k] * b.m[k][j];
+	return result;
+}
+mat4 matrix_rotate(mat4 mat, vec4 axis_angle) { //ty chatgpt
+	vec3 axis = { { axis_angle.f[0], axis_angle.f[1], axis_angle.f[2] } };
+	float angle = axis_angle.f[3];
+
+	float axis_length = sqrt(axis.f[0] * axis.f[0] + axis.f[1] * axis.f[1] + axis.f[2] * axis.f[2]);
+	axis.f[0] /= axis_length;
+	axis.f[1] /= axis_length;
+	axis.f[2] /= axis_length;
+
+	float cos_theta = cos(angle);
+	float sin_theta = sin(angle);
+	float one_minus_cos = 1.0f - cos_theta;
+
+	float x = axis.f[0], y = axis.f[1], z = axis.f[2];
+	mat4 rotation = { 0 };
+	rotation.m[0][0] = cos_theta + x * x * one_minus_cos;
+	rotation.m[0][1] = x * y * one_minus_cos - z * sin_theta;
+	rotation.m[0][2] = x * z * one_minus_cos + y * sin_theta;
+	rotation.m[0][3] = 0.0f;
+	rotation.m[1][0] = y * x * one_minus_cos + z * sin_theta;
+	rotation.m[1][1] = cos_theta + y * y * one_minus_cos;
+	rotation.m[1][2] = y * z * one_minus_cos - x * sin_theta;
+	rotation.m[1][3] = 0.0f;
+	rotation.m[2][0] = z * x * one_minus_cos - y * sin_theta;
+	rotation.m[2][1] = z * y * one_minus_cos + x * sin_theta;
+	rotation.m[2][2] = cos_theta + z * z * one_minus_cos;
+	rotation.m[2][3] = 0.0f;
+	rotation.m[3][0] = 0.0f;
+	rotation.m[3][1] = 0.0f;
+	rotation.m[3][2] = 0.0f;
+	rotation.m[3][3] = 1.0f;
+
+	return matrix_multi(mat, rotation);
+}
+mat4 matrix_translate(mat4 mat, vec3 vec) {
+	mat4 mat_translate = matrix_identity();
+	for (int i = 0; i < 3; i++) mat_translate.m[3][i] = vec.f[i];
+	return matrix_multi(mat, mat_translate);
+}
+mat4 matrix_scale(mat4 mat, vec3 scale) {
+	for (int i = 0; i < 3; i++) mat.m[i][i] *= scale.f[i];
+	return mat;
+}
+
+//opengl
+GLuint OPENGLcompileshader(const char* vert, const char* frag) {
+	GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+	glShaderSource(vertex_shader, 1, &vert, NULL);
+	glCompileShader(vertex_shader);
+	GLuint fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+	glShaderSource(fragment_shader, 1, &frag, NULL);
+	glCompileShader(fragment_shader);
+
+	GLuint shader_program = glCreateProgram();
+	glAttachShader(shader_program, vertex_shader);
+	glAttachShader(shader_program, fragment_shader);
+	glLinkProgram(shader_program);
+
+	glDeleteShader(vertex_shader);
+	glDeleteShader(fragment_shader);
+
+	return shader_program;
+}
+
+void OPENGLsetupbuffers(GLuint* VAO, GLuint* VBO) {
+	glGenVertexArrays(1, VAO);
+	glGenBuffers(1, VBO);
+
+	glBindVertexArray(*VAO);
+	glBindBuffer(GL_ARRAY_BUFFER, *VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
+GLuint OPENGLloadTexture(const char* filename) {
+	int width, height, channels;
+	unsigned char* data = stbi_load(filename, &width, &height, &channels, 0);
+	if (!data) {
+		printf("Failed to load texture: %s\n", stbi_failure_reason());
+	}
+
+	GLuint texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	GLenum format = (channels == 4) ? GL_RGBA : GL_RGB;
+
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	stbi_image_free(data);
+	return texture;
+}
+
+void OPENGLbind_mat4(GLuint program, const char* field, mat4 mat) {
+	GLint location = glGetUniformLocation(program, field);
+	glUniformMatrix4fv(location, 1, GL_FALSE, &mat.m[0][0]);
+}
+
+//game
+//camera... with some basic camera related functions
+struct camera {
+	vec3 pos;
+	vec3 rot;
+	int free_mode;
+};
+mat4 camera_to_matrix(struct camera* camera) {
+	mat4 result = matrix_identity();
+	result = matrix_translate(result, (vec3) {
+		-camera->pos.f[0],
+			-camera->pos.f[1],
+			-camera->pos.f[2]
+	});
+	result = matrix_rotate(result, (vec4) { 0, 1, 0, camera->rot.f[1] * (PI / 180) });
+	result = matrix_rotate(result, (vec4) { 1, 0, 0, camera->rot.f[0] * (PI / 180) });
+	result = matrix_rotate(result, (vec4) { 0, 0, 1, camera->rot.f[2] * (PI / 180) });
+	return result;
+}
+void camera_rotate(struct camera* camera, vec3 rot) {
+	camera->rot = vector_combine(camera->rot, rot);
+	//for (int i = 0; i < 3; i++) camera->rot.f[i] += rot.f[i];
+	vector_normalize(&camera->rot);
+	vector_clamp(&camera->rot);
+}
+void camera_translate(struct camera* camera, vec3 pos) {
+	camera->pos = vector_combine(camera->pos, pos);
+	//for (int i = 0; i < 3; i++) camera->pos.f[i] += pos.f[i];
+}
+void camera_set(struct camera* camera, vec3 pos, vec3 rot) {
+	for (int i = 0; i < 3; i++) camera->rot.f[i] = rot.f[i];
+	vector_normalize(&camera->rot);
+	vector_clamp(&camera->rot);
+	for (int i = 0; i < 3; i++) camera->pos.f[i] = pos.f[i];
+}
+void camera_print(struct camera* camera) {
+	fprintf(stderr, "Camera coords: Pos{ %.f, ", camera->pos.f[0]);
+	fprintf(stderr, "%.f, ", camera->pos.f[1]);
+	fprintf(stderr, "%.f } Rot{ ", camera->pos.f[2]);
+	fprintf(stderr, "%.f, ", camera->rot.f[0]);
+	fprintf(stderr, "%.f, ", camera->rot.f[1]);
+	fprintf(stderr, "%.f}\n", camera->rot.f[2]);
+}
+
+//cubes... with some cube related functions
+#define chunk_x 8
+#define chunk_y 8
+#define chunk_z 8
+#define chunk_size (chunk_x * chunk_y * chunk_z)
+#define world_x 4
+#define world_z 4
+#define FACE_FRONT  (1 << 0)
+#define FACE_BACK   (1 << 1)
+#define FACE_LEFT   (1 << 2)
+#define FACE_RIGHT  (1 << 3)
+#define FACE_TOP    (1 << 4)
+#define FACE_BOTTOM (1 << 5)
+#define FACE_ALL (FACE_FRONT | FACE_BACK | FACE_LEFT | FACE_RIGHT | FACE_TOP | FACE_BOTTOM)
+struct cube {
+	vec3 pos;
+	int type;
+	unsigned char faces;
+};
+struct chunk {
+	vec3 pos;
+	struct cube cubes[chunk_size];
+	int draw;
+};
+static struct chunk* chunk_generate() {
+	struct chunk* chunk = malloc(sizeof(struct chunk));
+	if (!chunk) {
+		fprintf(stderr, "Failed to allocate memory for chunk\n");
+		exit(EXIT_FAILURE);
+	}
+	memset(chunk, 0, sizeof(struct chunk));  // Zero out memory
+
+	int index = 0;
+	for (int x = 0; x < chunk_x; x++)
+		for (int y = 0; y < chunk_y; y++)
+			for (int z = 0; z < chunk_z; z++) {
+				index = x + y * chunk_x + z * chunk_x * chunk_y;
+				chunk->cubes[index].pos = (vec3){ x, y, z };
+				chunk->cubes[index].type = int_random(1, 1);
+			}
+	return chunk;
+}
+static struct chunk** world_generate() {
+	struct chunk** chunks = malloc(world_x * world_z * sizeof(struct chunk*));
+	if (!chunks) {
+		fprintf(stderr, "Failed to allocate memory for world chunks\n");
+		exit(EXIT_FAILURE);
+	}
+
+	int index = 0;
+	for (int x = 0; x < world_x; x++)
+		for (int z = 0; z < world_z; z++) {
+			index = x + z * world_x;
+			chunks[index] = chunk_generate();
+			chunks[index]->pos = (vec3){ x * chunk_x,0,z * chunk_z };
+		}
+	return chunks;
+}
+void world_optimize(struct chunk** world, int start, int stop) {
+	int index;
+	for (int c = start; c < stop; c++) {
+		for (int b = 0; b < chunk_size; b++)
+			world[c]->cubes[b].faces = 0;  // Reset faces
+
+		for (int x = 0; x < chunk_x; x++)
+			for (int y = 0; y < chunk_y; y++)
+				for (int z = 0; z < chunk_z; z++) {
+					index = x + y * chunk_x + z * chunk_x * chunk_y;
+
+					// Get current cube
+					struct cube* cube = &world[c]->cubes[index];
+
+					// LEFT / RIGHT
+					if (x == 0) {
+						// Check if there's a left chunk
+						if (c % world_x > 0 && world[c - 1]) {
+							int neighbor_index = (chunk_x - 1) + y * chunk_x + z * chunk_x * chunk_y;
+							if (world[c - 1]->cubes[neighbor_index].type == 0)
+								cube->faces |= FACE_LEFT;
+						}
+						else {
+							cube->faces |= FACE_LEFT;  // No chunk? Always visible
+						}
+					}
+
+					if (x == chunk_x - 1) {
+						// Check if there's a right chunk
+						if (c % world_x < world_x - 1 && world[c + 1]) {
+							int neighbor_index = y * chunk_x + z * chunk_x * chunk_y;
+							if (world[c + 1]->cubes[neighbor_index].type == 0 ||
+								world[c]->cubes[neighbor_index].type == 0)
+								cube->faces |= FACE_RIGHT;
+						}
+						else {
+							cube->faces |= FACE_RIGHT;
+						}
+					}
+					if (index - 1 >= 0 && world[c]->cubes[index - 1].type == 0)
+						cube->faces |= FACE_LEFT;
+					if (index + 1 <= chunk_size && world[c]->cubes[index + 1].type == 0)
+						cube->faces |= FACE_RIGHT;
+
+					// BOTTOM / TOP
+					if (y == 0) cube->faces |= FACE_BOTTOM;  // Ground is always visible
+					if (y == chunk_y - 1) cube->faces |= FACE_TOP;
+					if (index - chunk_x >= 0 && world[c]->cubes[index - chunk_x].type == 0)
+						cube->faces |= FACE_BOTTOM;
+					if (index + chunk_x <= chunk_size && world[c]->cubes[index + chunk_x].type == 0)
+						cube->faces |= FACE_TOP;
+
+					// BACK / FRONT
+					if (z == 0) {
+						if (c >= world_x && world[c - world_x]) {
+							int neighbor_index = x + y * chunk_x + (chunk_z - 1) * chunk_x * chunk_y;
+							if (world[c - world_x]->cubes[neighbor_index].type == 0 ||
+								world[c]->cubes[neighbor_index].type == 0)
+								cube->faces |= FACE_BACK;
+						}
+						else {
+							cube->faces |= FACE_BACK;
+						}
+					}
+					if (z == chunk_z - 1) {
+						if (c < (world_x * (world_z - 1)) && world[c + world_x]) {
+							int neighbor_index = x + y * chunk_x;
+							if (world[c + world_x]->cubes[neighbor_index].type == 0 ||
+								world[c]->cubes[neighbor_index].type == 0)
+								cube->faces |= FACE_FRONT;
+						}
+						else {
+							cube->faces |= FACE_FRONT;
+						}
+					}
+					if (index - chunk_x * chunk_y >= 0 && world[c]->cubes[index - chunk_x * chunk_y].type == 0)
+						cube->faces |= FACE_BACK;
+					if (index + chunk_x * chunk_y <= chunk_size && world[c]->cubes[index + chunk_x * chunk_y].type == 0)
+						cube->faces |= FACE_FRONT;
+				}
+	}
+}
+
+void free_world(struct chunk** world) {
+	for (int i = 0; i < world_x * world_z; i++) {
+		free(world[i]);  // Free each chunk
+	}
+	free(world);  // Free world array
+}
+
+//balls
+void error_callback(int error, const char* description) {
+	fprintf(stderr, "Error: %s..", description);
+}
+
+void key_input(GLFWwindow* window) {
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE))
+		glfwSetWindowShouldClose(window, GLFW_TRUE);
+	if (glfwGetKey(window, GLFW_KEY_1))
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (glfwGetKey(window, GLFW_KEY_2))
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
+void main() {
+	glfwSetErrorCallback(error_callback);
+	glfwInit();
+	GLFWwindow* window = glfwCreateWindow(800, 600, "lol", NULL, NULL);
+	glfwMakeContextCurrent(window);
+	gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+
+	GLuint shaderprogram = OPENGLcompileshader(vertex_source, fragment_source);
+	GLuint VAO, VBO;
+	OPENGLsetupbuffers(&VAO, &VBO);
+	GLuint textures[2] = {
+		OPENGLloadTexture("test.png"),
+		OPENGLloadTexture("stone.png")
+	};
+	glEnable(GL_DEPTH_TEST);
+
+	//game objects
+	struct camera player_camera = { 0 };
+	player_camera.free_mode = 1;
+
+	struct chunk** world = world_generate();
+	world_optimize(world, 0, world_x * world_z);
+
+	int width, height; float ratio;
+	double time;
+	while (!glfwWindowShouldClose(window)) {
+		key_input(window);
+		//lol
+		if (player_camera.free_mode != 0) {
+			if (glfwGetKey(window, GLFW_KEY_UP))
+				camera_rotate(&player_camera, (vec3) { 2, 0, 0 });
+			if (glfwGetKey(window, GLFW_KEY_DOWN))
+				camera_rotate(&player_camera, (vec3) { -2, 0, 0 });
+			if (glfwGetKey(window, GLFW_KEY_LEFT))
+				camera_rotate(&player_camera, (vec3) { 0, 2, 0 });
+			if (glfwGetKey(window, GLFW_KEY_RIGHT))
+				camera_rotate(&player_camera, (vec3) { 0, -2, 0 });
+			float str = 0.2;
+			if (glfwGetKey(window, GLFW_KEY_W))
+				camera_translate(&player_camera, vector_rotate3d((vec3) { -str,-str,-str }, player_camera.rot));
+			if (glfwGetKey(window, GLFW_KEY_S))
+				camera_translate(&player_camera, vector_rotate3d((vec3) { str, str, str }, player_camera.rot));
+		}
+		//camera_print(&player_camera);
+		if (glfwGetKey(window, GLFW_KEY_DELETE))
+			free_world(world);
+
+		glfwGetFramebufferSize(window, &width, &height);
+		ratio = (float)width / (float)height;
+		time = glfwGetTime();
+
+		glViewport(0, 0, width, height);
+		glClearColor(0.1, 0.2, 0.3, 1);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		mat4 projection = matrix_perspective(70, ratio, 0.1, 100);
+		OPENGLbind_mat4(shaderprogram, "projection", projection);
+		//camera
+		mat4 view = matrix_identity();
+		view = camera_to_matrix(&player_camera);
+		OPENGLbind_mat4(shaderprogram, "view", view);
+
+		//render world
+		glUseProgram(shaderprogram);
+		for (int chunk_index = 0; chunk_index < world_x * world_z; chunk_index++) {
+			world[chunk_index]->draw = 1;
+			if (world[chunk_index]->draw == 0)
+				continue;
+			for (int cube_index = 0; cube_index < chunk_size; cube_index++) {
+				if (world[chunk_index]->cubes[cube_index].type == 0 && world[chunk_index]->cubes[cube_index].faces == 0)
+					continue;
+				mat4 model = matrix_identity();
+				vec3 pos = vector_combine(world[chunk_index]->pos, world[chunk_index]->cubes[cube_index].pos);
+				model = matrix_translate(model, pos);
+				OPENGLbind_mat4(shaderprogram, "model", model);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, textures[world[chunk_index]->cubes[cube_index].type]);
+				glUniform1i(glGetUniformLocation(shaderprogram, "texture1"), 0);
+				glBindVertexArray(VAO);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_FRONT)
+					glDrawArrays(GL_TRIANGLES, 0, 6);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_BACK)
+					glDrawArrays(GL_TRIANGLES, 6, 6);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_LEFT)
+					glDrawArrays(GL_TRIANGLES, 12, 6);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_RIGHT)
+					glDrawArrays(GL_TRIANGLES, 18, 6);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_TOP)
+					glDrawArrays(GL_TRIANGLES, 24, 6);
+				if (world[chunk_index]->cubes[cube_index].faces & FACE_BOTTOM)
+					glDrawArrays(GL_TRIANGLES, 30, 6);
+				glBindVertexArray(0);
+				glBindTexture(GL_TEXTURE_2D, 0);
+			}
+		}
+
+		//cube
+		glUseProgram(shaderprogram);
+		mat4 model = matrix_identity();
+		model = matrix_scale(model, (vec3) { 0.25, 0.5, 1 });
+		model = matrix_rotate(model, (vec4) { 0.2, 0.4, 0.6, (float)time });
+		model = matrix_translate(model, (vec3) { 0, 0, -2 });
+		OPENGLbind_mat4(shaderprogram, "model", model);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glUniform1i(glGetUniformLocation(shaderprogram, "texture1"), 0);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		glfwSwapInterval(1.5);
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+	free_world(world);
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteProgram(&shaderprogram);
+	glfwDestroyWindow(window);
+	glfwTerminate();
+	return 0;
+}
